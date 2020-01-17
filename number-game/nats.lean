@@ -84,3 +84,67 @@ lemma add_associativity (x y z : mynat) :
         rw <- mynat_add_succ,
         rw <- mynat_add_succ,
     end
+
+-------------------------------------------------------------------------------
+--                              Multiplication                               --
+-------------------------------------------------------------------------------
+
+-- Multiplication on naturals
+def mul : mynat -> mynat -> mynat
+    | m zero     := zero
+    | m (succ n) := add m (mul m n)
+
+-------------------------
+-- Prerequisite Proofs --
+
+lemma mynat_zero_mul (n : mynat) :
+    mul zero n = zero :=
+    begin
+        induction n with d hd,
+
+        -- Base case
+        rw mul,
+
+        -- Inductive case
+        rw mul,
+        rw hd,
+        rw add,
+    end
+
+lemma mynat_mul_succ (x y : mynat) :
+    mul (succ x) y = add y (mul x y) :=
+    begin
+        -- this is a lie
+        sorry,
+    end
+
+-------------------------
+-- Commutativity Proof --
+lemma mul_commutativity (x y : mynat) :
+    mul x y = mul y x :=
+    begin
+        induction y with d hd,
+
+        -- Base case
+        rw mul,
+        rw mynat_zero_mul,
+
+        -- Inductive case
+        rw mul,
+        rw mynat_mul_succ,
+        rw hd,
+    end
+
+-------------------------
+-- Associativity Proof --
+lemma mul_associativity (x y z : mynat) :
+    mul x (mul y z) = mul (mul x y) z :=
+    begin
+        induction z with d hd,
+
+        -- Base Case
+        sorry,
+
+        -- Inductive Case
+        sorry,
+    end
