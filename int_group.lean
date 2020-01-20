@@ -189,4 +189,31 @@ lemma inverse_add (n : myint) :
     },
   end
 
+-- Commutativity, since integers form an abelian group
+lemma commutative (m n : myint) :
+  add m n = add n m :=
+  begin
+    induction n with d hd d hd,
+
+    -- Base case
+    {
+      rw add_zero,
+      rw zero_add,
+    },
+
+    -- Succ case
+    {
+      rw add,
+      rw add_succ,
+      rw hd,
+    },
+
+    -- Pred case
+    {
+      rw add,
+      rw add_pred,
+      rw hd,
+    }
+  end
+
 end hidden
