@@ -6,6 +6,7 @@ solving from are:
 
 * `aata` = [Abstract Algebra: Theory and Application](http://abstract.ups.edu/)
 * `homotopy` = [Homotopy Type Theory](https://homotopytypetheory.org/book/)
+* `tpil` = [Theorem Proving in Lean](https://leanprover.github.io/theorem_proving_in_lean/)
 
 ## License
 
