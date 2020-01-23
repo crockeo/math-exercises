@@ -189,15 +189,158 @@ end
 section
   open classical
 
+  section
+    #check by_cases
+    #check not.intro
+  end
+
   variables p q r s : Prop
 
-  example : (p → r ∨ s) → ((p → r) ∨ (p → s)) := sorry
-  example : ¬(p ∧ q) → ¬p ∨ ¬q := sorry
-  example : ¬(p → q) → p ∧ ¬q := sorry
-  example : (p → q) → (¬p ∨ q) := sorry
-  example : (¬q → ¬p) → (p → q) := sorry
-  example : p ∨ ¬p := sorry
-  example : (((p → q) → p) → p) := sorry
+  section
+    variable f : p → q
+    variable hnp : ¬p
+
+    #check f hnp
+  end
+
+  example : (p → r ∨ s) → ((p → r) ∨ (p → s)) :=
+  begin
+    assume h,
+    
+    have hi_pos : p → (p → r) ∨ (p → s),
+    {
+      assume hp,
+      have hrs : r ∨ s, from h hp,
+
+      exact
+        or.elim
+          hrs
+          (λ hr : r, or.intro_left (p → s) (λ hp' : p, hr))
+          (λ hs : s, or.intro_right (p → r) (λ hp' : p, hs)),
+    },
+
+    have hi_neg : ¬p → (p → r) ∨ (p → s),
+    {
+      assume hnp,
+      
+      suffices hpr : p → r,
+      exact or.intro_left (p → s) hpr,
+
+      assume hp,
+      exact absurd hp hnp,
+    }
+
+    by_cases hi_pos hi_neg,
+  end
+  
+  example : ¬(p ∧ q) → ¬p ∨ ¬q :=
+  begin
+    assume h,
+
+    have f : p → ¬p ∨ ¬q,
+    {
+      assume hp,
+
+      have hq : ¬q,
+      {
+        assume hq' : q,
+        exact h (and.intro hp hq'),
+      },
+
+      exact or.intro_right (¬p) hq,
+    },
+
+    have g : ¬p → ¬p ∨ ¬q,
+    assume hp,
+    exact or.intro_left (¬q) hp,
+
+    exact by_cases f g,
+  end
+  
+  example : ¬(p → q) → p ∧ ¬q :=
+  begin
+    assume h,
+
+    have pos : q → p ∧ ¬q,
+    {
+      assume hq,
+      exact false.elim (h (λ hp : p, hq)),
+    },
+
+    have neg : ¬q → p ∧ ¬q,
+    {
+      assume hnq,
+      exact
+        by_cases
+          (λ hp : p, and.intro hp hnq)
+          (λ hnp : ¬p,
+            suffices hneg : p → q, from false.elim (h hneg),
+            assume hp,
+            absurd hp hnp),
+    },
+
+    exact by_cases pos neg,
+  end
+
+  example : (p → q) → (¬p ∨ q) :=
+  begin
+    assume h,
+
+    have f : p → ¬p ∨ q,
+    assume hp,
+    exact or.inr (h hp),
+
+    have g : ¬p → ¬p ∨ q,
+    assume hnp,
+    exact or.inl hnp,
+
+    exact or.elim (em p) f g,
+  end
+
+  -- NOTE: Here I'm using `absurd` when we have ¬q, because we find a
+  --       contradiction. Logically it's like saying that logical branch cannot
+  --       exist?
+  example : (¬q → ¬p) → (p → q) :=
+  begin
+    assume h,
+    assume hp,
+
+    exact by_cases
+      (λ hq : q, hq)
+      (λ hnq : ¬q, absurd hp (h hnq)),
+  end
+  
+  example : p ∨ ¬p :=
+  begin
+    exact em p,
+  end
+
+  example : (((p → q) → p) → p) :=
+  begin
+    assume h,
+
+    have pos : p → p, from id,
+    
+    have neg : ¬p → p,
+    {
+      assume hnp,
+
+      have qpos : q → p,
+      assume hq,
+      exact h (λ hp : p, hq),
+
+      have qneg : ¬q → p,
+      assume hnq,
+
+      suffices hneg : p → q, from h hneg,
+      assume hp,
+      exact absurd hp hnp,
+
+      exact by_cases qpos qneg,
+    },
+
+    exact by_cases pos neg,
+  end
 end
 
 -- Exercise 3
@@ -206,5 +349,25 @@ end
 section
   variables p : Prop
 
-  example : ¬(p ↔ ¬p) := sorry
+  example : ¬(p ↔ ¬p) :=
+  begin
+    assume hneg,
+
+    exact
+      classical.by_cases
+        (λ hp : p, absurd hp (hneg.mp hp))
+        (λ hnp : ¬p, absurd (hneg.mpr hnp) hnp),
+  end
+
+  example : ¬(p ↔ ¬p) :=
+  begin
+    assume hneg : (p ↔ ¬p),
+
+    have hnp : ¬p,
+    show p → false,
+    assume hp : p,
+    exact (hneg.mp hp) hp,
+
+    exact absurd (hneg.mpr hnp) hnp,
+  end
 end
